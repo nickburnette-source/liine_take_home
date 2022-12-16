@@ -3,6 +3,11 @@
 This project is to demonstrate a Python API for providing a list of restaurants
 open at a given datetime query string.
 
+# Postman Collection
+https://api.postman.com/collections/14011705-cbcfd705-f3ab-484c-b902-159a95245820?access_key=PMAT-01GME102RH8RNZ23T9R4EARZRN
+
+I use Postman for testing my APIs
+
 ## Components:
 #### ETL - Extract restaurant info, Transform into easy lookup object, Load into sql db
 #### DB - sqlite3 db managed by sqlalchemy to simplify query of restaurants open
