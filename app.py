@@ -80,7 +80,7 @@ class ETL:
             'thursday': 3, 'thu': 3, 3: 'thursday',
             'friday': 4, 'fri': 4, 4: 'friday',
             'saturday': 5, 'sat': 5, 5: 'saturday',
-            'sunday': 6, 'sun': 6, 6: 'sunday'
+            'sunday': 6, 'sun': 6, 6: 'sunday', -1: 'sunday'
         }
         self.all_days = ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')
         if method == 'csv':
@@ -174,13 +174,13 @@ def index():
         return json.dumps({'success': False, 'message': f'Unsupported datetime string format.\nTry one of these: {dt_to_re_map.keys()}'}), \
                400, {'ContentType': 'application/json'}
     attempt_1 = (app_etl.day_map[dt.weekday()], int(dt.strftime('%H%M')))
-    attempt_2 = (app_etl.day_map[dt.weekday() - 1], int(dt.strftime('%H%M')) + 2400)
+    attempt_2 = (app_etl.day_map[dt.weekday() - 1], int(dt.strftime('%H%M')) + 2400)  # 47:59:59
     results = set(Restaurant.query.filter(getattr(Restaurant, f'{attempt_1[0]}_open') <= attempt_1[1],
                                           getattr(Restaurant, f'{attempt_1[0]}_closed') >= attempt_1[1]).all())
-    maybe = Restaurant.query.filter(getattr(Restaurant, f'{attempt_2[0]}_open') <= attempt_2[1],
-                                    getattr(Restaurant, f'{attempt_2[0]}_closed') >= attempt_2[1]).all()
+    maybe = set(Restaurant.query.filter(getattr(Restaurant, f'{attempt_2[0]}_open') <= attempt_2[1],
+                                        getattr(Restaurant, f'{attempt_2[0]}_closed') >= attempt_2[1]).all())
     if maybe:
-        results = results.add(maybe) if results else set(maybe)
+        results = results.union(maybe) if results else set(maybe)
     response = [r.name for r in results]
 
     return json.dumps({'success': True, 'data': response}), 200, {'ContentType': 'application/json'}
@@ -204,3 +204,4 @@ if __name__ == '__main__':
     app_etl.method()
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=True, threaded=False)
+
